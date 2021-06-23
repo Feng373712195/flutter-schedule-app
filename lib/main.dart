@@ -1,54 +1,74 @@
 import 'package:flutter/material.dart';
 
-class MyAppBar extends StatelessWidget {
-  MyAppBar({this.title});
+class Product {
+  const Product({this.name});
+  final String name;
+}
 
-  final Widget title;
+typedef void CartChangedCallback(Product product, bool inCart);
+
+class ShoppingList extends StatefulWidget {
+  ShoppingList({Key key , this.products }) : super(key: key)
+
+  final List<Product> products;
+
+  _ShoppingListState createState() => new _ShoppingListState();
+}
+
+class _ShoppingListState extends State<ShoppingList>{
+  Set<Product> _shoppingCart = new Set<Product>();
+
+  void _handleCartChaned(Product product , bool inCart){
+    setState(() {
+      if(inCart)
+        _shoppingCart.add(product);
+      else
+        _shoppingCart.remove(product);
+    });
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return new Container(
-      height: 56.0,
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      decoration: new BoxDecoration(color: Colors.blue[500]),
-      child: new Row(
-        children: <Widget>[
-          new IconButton(
-              icon: new Icon(Icons.menu),
-              tooltip: 'Navigation menu',
-              onPressed: null),
-          new Expanded(child: title),
-          new IconButton(
-              icon: new Icon(Icons.search),
-              tooltip: 'Search Search Search',
-              onPressed: null)
-        ],
+  Widget build(BuildContext context){
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Shopping List'),
       ),
     );
   }
 }
 
-class MyScaffold extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new Material(
-        child: new Column(
-      children: <Widget>[
-        new MyAppBar(
-          title: new Text(
-            'Example title',
-            style: Theme.of(context).primaryTextTheme.title,
-          ),
-        ),
-        new Expanded(
-            child: new Center(
-          child: new Text('Hello,world'),
-        ))
-      ],
-    ));
-  }
-}
 
-void main() {
-  runApp(new MaterialApp(title: 'My app', home: new MyScaffold()));
+
+
+class ShoppingListItem extends StatelessWidget {
+  ShoppingListItem({Product product, this.inCart, this.onCartChanged})
+      : product = product,
+        super(key: new ObjectKey(product));
+
+  final Product product;
+  final bool inCart;
+  final CartChangedCallback onCartChanged;
+
+  Color _getColor(BuildContext context) {
+    return inCart ? Colors.black54 : Theme.of(context).primaryColor;
+  }
+
+  TextStyle _getTextStyle(BuildContext context) {
+    if (!inCart) return null;
+    return new TextStyle(
+        color: Colors.black54, decoration: TextDecoration.lineThrough);
+  }
+
+  Widget build(BuildContext context) {
+    return new ListTile(
+      onTap: () {
+        onCartChanged(product, !inCart);
+      },
+      leading: new CircleAvatar(
+        backgroundColor: _getColor(context),
+        child: new Text(product.name[0]),
+      ),
+      title: new Text(product.name, style: _getTextStyle(context)),
+    );
+  }
 }
