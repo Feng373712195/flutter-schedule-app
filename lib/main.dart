@@ -33,6 +33,16 @@ class _ShoppingListState extends State<ShoppingList>{
       appBar: new AppBar(
         title: new Text('Shopping List'),
       ),
+      body:new ListView(
+        padding: new EdgeInsets.symmetric(vertical: 8.0),
+        children: widget.products.map((Product product){
+          return new ShoppingListItem(
+            product: product,
+            inCart: _shoppingCart.contains(product),
+            onCartChanged: _h,
+          )
+        }),
+      )
     );
   }
 }
