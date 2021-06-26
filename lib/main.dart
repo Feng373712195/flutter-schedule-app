@@ -1,84 +1,28 @@
 import 'package:flutter/material.dart';
 
-class Product {
-  const Product({this.name});
-  final String name;
-}
-
-typedef void CartChangedCallback(Product product, bool inCart);
-
-class ShoppingList extends StatefulWidget {
-  ShoppingList({Key key , this.products }) : super(key: key)
-
-  final List<Product> products;
-
-  _ShoppingListState createState() => new _ShoppingListState();
-}
-
-class _ShoppingListState extends State<ShoppingList>{
-  Set<Product> _shoppingCart = new Set<Product>();
-
-  void _handleCartChaned(Product product , bool inCart){
-    setState(() {
-      if(inCart)
-        _shoppingCart.add(product);
-      else
-        _shoppingCart.remove(product);
-    });
-  }
-
+class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Shopping List'),
-      ),
-      body:new ListView(
-        padding: new EdgeInsets.symmetric(vertical: 8.0),
-        children: widget.products.map((Product product){
-          return new ShoppingListItem(
-            product: product,
-            inCart: _shoppingCart.contains(product),
-            onCartChanged: _h,
-          )
-        }),
-      )
-    );
-  }
-}
-
-
-
-
-class ShoppingListItem extends StatelessWidget {
-  ShoppingListItem({Product product, this.inCart, this.onCartChanged})
-      : product = product,
-        super(key: new ObjectKey(product));
-
-  final Product product;
-  final bool inCart;
-  final CartChangedCallback onCartChanged;
-
-  Color _getColor(BuildContext context) {
-    return inCart ? Colors.black54 : Theme.of(context).primaryColor;
-  }
-
-  TextStyle _getTextStyle(BuildContext context) {
-    if (!inCart) return null;
-    return new TextStyle(
-        color: Colors.black54, decoration: TextDecoration.lineThrough);
-  }
-
   Widget build(BuildContext context) {
-    return new ListTile(
-      onTap: () {
-        onCartChanged(product, !inCart);
-      },
-      leading: new CircleAvatar(
-        backgroundColor: _getColor(context),
-        child: new Text(product.name[0]),
+    final title = 'Fade in images';
+
+    return new MaterialApp(
+      title: title,
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: new Text(title),
+        ),
+        body: new Stack(
+          children: <Widget>[
+            new Center(child: new CircularProgressIndicator()),
+            new Center(
+              child: new FadeInImage.memoryNetwork(
+                  placeholder: null,
+                  image:
+                      'https://img2.doubanio.com/view/group_topic/l/public/p430215373.webp'),
+            )
+          ],
+        ),
       ),
-      title: new Text(product.name, style: _getTextStyle(context)),
     );
   }
 }
