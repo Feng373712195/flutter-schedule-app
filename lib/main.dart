@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 
-// 222
-
 class AnimatedListSample extends StatefulWidget {
   @override
   _AnimatedListSampleState createState() => new _AnimatedListSampleState();
@@ -40,12 +38,22 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
     );
   }
 
+  Widget _buildRemovedItem(
+      int item, BuildContext context, Animation<double> animation) {
+    return new CardItem(
+      animation: animation,
+      item: item,
+      selected: false,
+    );
+  }
+
   void _insert() {
-    final int index = _selectedItem == null ? _list.length : _list.indexOf();
+    final int index =
+        _selectedItem == null ? _list.length : _list.indexOf(_selectedItem);
     _list.insert(index, _nextItem++);
   }
 
-  void remove() {
+  void _remove() {
     if (_selectedItem != null) {
       _list.removeAt(_list.indexOf(_selectedItem));
       setState(() {
@@ -53,15 +61,68 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
       });
     }
   }
+
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: new Scaffold(
+        appBar: new AppBar(
+          title: const Text('AnimatedList'),
+          actions: <Widget>[
+            new IconButton(
+                tooltip: 'insert a new item',
+                onPressed: _insert,
+                icon: const Icon(Icons.add_circle)),
+            new IconButton(
+                tooltip: 'remove a new item',
+                onPressed: _remove,
+                icon: const Icon(Icons.remove_circle))
+          ],
+        ),
+        body: new Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: new AnimatedList(
+                key: _listKey,
+                initialItemCount: _list.length,
+                itemBuilder: _buildItem)),
+      ),
+    );
+  }
 }
 
-Widget _buildRemovedItem(
-    int item, BuildContext context, Animation<double> animation) {
-  return new CardItem(
-    animation: animation,
-    item: item,
-    selected: false,
-  );
+class ListModel<E> {
+  ListModel({
+    @required this.listKey,
+    @required this.removedItemBuilder,
+    Iterable<E> initialItems,
+  })  : assert(listKey != null),
+        assert(removedItemBuilder != null),
+        _items = new List<E>.from(initialItems ?? <E>[]);
+
+  final GlobalKey<AnimatedListState> listKey;
+  final dynamic removedItemBuilder;
+  final List<E> _items;
+
+  AnimatedListState get _animatedList => listKey.currentState;
+
+  void insert(int index, E item) {
+    _items.insert(index, item);
+    _animatedList.insertItem(index);
+  }
+
+  E removeAt(int index) {
+    final E removedItem = _items.removeAt(index);
+    if (removedItem != null) {
+      _animatedList.removeItem(index,
+          (BuildContext context, Animation<double> animation) {
+        return removedItemBuilder(removedItem, context, animation);
+      });
+    }
+    return removedItem;
+  }
+
+  int get length => _items.length;
+  E operator [](int index) => _items[index];
+  int indexOf(E item) => _items.indexOf(item);
 }
 
 class CardItem extends StatelessWidget {
@@ -108,4 +169,8 @@ class CardItem extends StatelessWidget {
       ),
     );
   }
+}
+
+void main() {
+  runApp(new AnimatedListSample());
 }
