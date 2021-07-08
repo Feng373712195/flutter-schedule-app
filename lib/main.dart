@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 
+// console
+
 class AnimatedListSample extends StatefulWidget {
   @override
   _AnimatedListSampleState createState() => new _AnimatedListSampleState();
